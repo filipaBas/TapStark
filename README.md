@@ -24,3 +24,8 @@ Each time the user plays, the game determines whether they have won the prize po
 - **Transaction Listener (Node.js)**: A Node.js script will continuously listen for user transactions (taps) on the network. This script will determine whether a given transaction is a winning attempt and update the contract accordingly.
   
 - **User Interface (React/Frontend)**: A simple web interface will guide users through the process of funding their wallet and participating in the betting game. The interface will integrate with the blockchain to update the prize pool and display user statistics.
+
+## Future Potential
+As the project evolves, additional features such as leaderboards, enhanced reward systems, and integration with other StarkNet applications can be added to boost user engagement. The accumulated points system opens the door for future token minting or exclusive benefits, fostering a strong player community over time.
+
+This MVP (Minimum Viable Product) aims to combine fun, microtransaction-driven gameplay with a demonstration of StarkNet’s scalability and transaction-handling capabilities.
