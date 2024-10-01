@@ -26,6 +26,8 @@ Each time the user plays, the game determines whether they have won the prize po
 - **User Interface (React/Frontend)**: A simple web interface will guide users through the process of funding their wallet and participating in the betting game. The interface will integrate with the blockchain to update the prize pool and display user statistics.
 
 ## Future Potential
-As the project evolves, additional features such as leaderboards, enhanced reward systems, and integration with other StarkNet applications can be added to boost user engagement. The accumulated points system opens the door for future token minting or exclusive benefits, fostering a strong player community over time.
+- **Verifiably Fair Gameplay**: We plan to improve the verifiably fair mechanics of the game, ensuring that every outcome is transparent and provably random, increasing player trust and confidence in the system.
 
-This MVP (Minimum Viable Product) aims to combine fun, microtransaction-driven gameplay with a demonstration of StarkNet’s scalability and transaction-handling capabilities.
+- **Token Minting and Rewards**: The accumulated points system can be leveraged for future token minting, enabling users to exchange points for exclusive benefits, fostering long-term loyalty and community growth.
+
+- **Open Verifiably Fair Engine**: Our goal is to develop a verifiably fair engine that not only powers this game but can also be used by other developers to ensure fairness in their own StarkNet-based games. This opens the door for broader use across the ecosystem, making our game a model for decentralized fairness.
