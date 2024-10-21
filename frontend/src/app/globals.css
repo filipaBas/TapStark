@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-jura: 'Jura', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-jura), Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .glow {
+    text-shadow: 0 0 5px rgba(56, 189, 252, 0.7), 0 0 10px rgba(56, 189, 252, 0.7), 0 0 15px rgba(56, 189, 252, 0.7);
+  }
+}
+
+@layer components {
+  .glow-pulse {
+    text-shadow: 
+      0 0 3px rgba(56, 189, 252, 0.5), 
+      0 0 6px rgba(56, 189, 252, 0.5), 
+      0 0 9px rgba(56, 189, 252, 0.5);
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      text-shadow: 
+        0 0 3px rgba(56, 189, 252, 0.5), 
+        0 0 6px rgba(56, 189, 252, 0.5), 
+        0 0 9px rgba(56, 189, 252, 0.5);
+    }
+    50% {
+      text-shadow: 
+        0 0 6px rgba(56, 189, 252, 0.8), 
+        0 0 12px rgba(56, 189, 252, 0.8), 
+        0 0 18px rgba(56, 189, 252, 0.8);
+    }
+  }
+}
+
+.button-glow {
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.7), 0 0 20px rgba(0, 204, 255, 0.5); /* cyan-400 */
+  transition: box-shadow 0.3s ease;
+}
+
+.button-glow-active {
+  box-shadow: 0 0 20px rgba(0, 204, 255, 1), 0 0 30px rgba(0, 204, 255, 0.5); /* cyan-400 */
+}
