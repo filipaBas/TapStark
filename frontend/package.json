@@ -12,6 +12,7 @@
     "@starknet-react/chains": "^3.0.0",
     "@starknet-react/core": "^3.0.1",
     "framer-motion": "^11.11.7",
+    "lucide-react": "^0.453.0",
     "motion-number": "^0.1.7",
     "next": "14.2.15",
     "react": "^18",
