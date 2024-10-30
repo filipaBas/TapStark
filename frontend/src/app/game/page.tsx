@@ -1,12 +1,19 @@
 "use client";
 import Image from "next/image";
 import * as motion from "framer-motion/client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWallet } from "../context/walletContext";
 import ConnectButton from "../components/connectButton";
 import { AnimatePresence } from "framer-motion";
 import AnimatedPoints from "../components/animatedPoints";
 import MotionNumber from "motion-number";
+
+import {
+  useAccount,
+  useContract,
+  useReadContract,
+  useSendTransaction,
+} from "@starknet-react/core";
 
 export default function GamePage() {
   const { isConnected } = useWallet();
@@ -14,23 +21,304 @@ export default function GamePage() {
   const [points, setPoints] = useState(0);
   const [showPoints, setShowPoints] = useState(false);
   const [addedPoints, setAddedPoints] = useState(0);
+  const [prizePool, setPrizePool] = useState(0);
+
+  const { address: userAddress } = useAccount();
+
+  const contractAddress = "0x044a14b61a797d551094d2c430b89391d7b83bd24bbd17ca0de39be9979e1510";
+
+  const contractAbi = [
+    {
+      "name": "BettingContract",
+      "type": "impl",
+      "interface_name": "test::betting_game::IBettingContract"
+    },
+    {
+      "name": "core::integer::u256",
+      "type": "struct",
+      "members": [
+        {
+          "name": "low",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "high",
+          "type": "core::integer::u128"
+        }
+      ]
+    },
+    {
+      "name": "core::bool",
+      "type": "enum",
+      "variants": [
+        {
+          "name": "False",
+          "type": "()"
+        },
+        {
+          "name": "True",
+          "type": "()"
+        }
+      ]
+    },
+    {
+      "name": "test::betting_game::IBettingContract",
+      "type": "interface",
+      "items": [
+        {
+          "name": "get_prize_pool",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "external"
+        },
+        {
+          "name": "get_user_points",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "view"
+        },
+        {
+          "name": "place_bet",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "bet_amount",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "transfer_prize",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "name": "approve_betting_amount",
+          "type": "function",
+          "inputs": [
+            {
+              "name": "amount",
+              "type": "core::integer::u256"
+            }
+          ],
+          "outputs": [
+            {
+              "type": "core::bool"
+            }
+          ],
+          "state_mutability": "external"
+        },
+        {
+          "name": "get_remaining_allowance",
+          "type": "function",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "core::integer::u256"
+            }
+          ],
+          "state_mutability": "view"
+        }
+      ]
+    },
+    {
+      "name": "constructor",
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "initial_backend_address",
+          "type": "core::starknet::contract_address::ContractAddress"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
+      "name": "test::betting_game::BettingContract::BetPlaced",
+      "type": "event",
+      "members": [
+        {
+          "kind": "data",
+          "name": "user",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "data",
+          "name": "amount",
+          "type": "core::integer::u256"
+        },
+        {
+          "kind": "data",
+          "name": "points_earned",
+          "type": "core::integer::u256"
+        },
+        {
+          "kind": "data",
+          "name": "remaining_allowance",
+          "type": "core::integer::u256"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
+      "name": "test::betting_game::BettingContract::BettingApproved",
+      "type": "event",
+      "members": [
+        {
+          "kind": "data",
+          "name": "user",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "data",
+          "name": "amount",
+          "type": "core::integer::u256"
+        }
+      ]
+    },
+    {
+      "kind": "struct",
+      "name": "test::betting_game::BettingContract::PrizeTransferred",
+      "type": "event",
+      "members": [
+        {
+          "kind": "data",
+          "name": "user",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "kind": "data",
+          "name": "amount",
+          "type": "core::integer::u256"
+        },
+        {
+          "kind": "data",
+          "name": "timestamp",
+          "type": "core::integer::u64"
+        }
+      ]
+    },
+    {
+      "kind": "enum",
+      "name": "test::betting_game::BettingContract::Event",
+      "type": "event",
+      "variants": [
+        {
+          "kind": "nested",
+          "name": "BetPlaced",
+          "type": "test::betting_game::BettingContract::BetPlaced"
+        },
+        {
+          "kind": "nested",
+          "name": "BettingApproved",
+          "type": "test::betting_game::BettingContract::BettingApproved"
+        },
+        {
+          "kind": "nested",
+          "name": "PrizeTransferred",
+          "type": "test::betting_game::BettingContract::PrizeTransferred"
+        }
+      ]
+    }
+  ];
+
+  const { contract } = useContract({
+    abi: contractAbi,
+    address: contractAddress,
+  });
+
+  const { data: prizePoolData, error: prizePoolError } = useReadContract({
+    abi: [
+      {
+        "name": "get_prize_pool",
+        "type": "function",
+        "inputs": [],
+        "outputs": [{ "type": "core::integer::u256" }],
+        "state_mutability": "view"
+      }
+    ] as const,
+    functionName: "get_prize_pool",
+    address: contractAddress,
+    args: [],
+  });
+
+  useEffect(() => {
+    if (prizePoolData && prizePoolData.result) {
+      const poolValue = parseInt(prizePoolData.result[0].low);
+      setPrizePool(poolValue);
+    } else if (prizePoolError) {
+      console.error("Error get prize pool:", prizePoolError);
+    }
+  }, [prizePoolData, prizePoolError]);
 
   const playSoundBetClick = () => {
     const audio = new Audio("/sounds/water-bleep.wav");
     audio.play();
   };
 
-  const handleTapToPlay = async () => {
-    const txHash =
-      "0x01a8731a6abf51cee46f8a32e277826fe78c2efa72ac17d6190e1f389cbbc74e"; // should be dynamic
+  // prepare to transaction
+  const exchangeRate = 2000;
 
+  const amountInUSD = 1;
+
+  const amountInETH = amountInUSD / exchangeRate;
+
+  const amountInWei = BigInt(amountInETH * 1e18);
+
+  console.log("amount in wei:", amountInWei);
+
+  const calls = useMemo(() => {
+    if (!userAddress || !contract) return [];
+    return [contract.populate("place_bet", [userAddress, {
+      low: amountInWei,
+      high: 0,
+    }])];
+  }, [contract, userAddress, amountInWei]);
+
+  const { send, error } = useSendTransaction({
+    calls: calls.length ? calls : undefined,
+  });
+
+  const handleTapToPlay = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/play/${txHash}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const txHash = await send();
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/play/${txHash}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -108,7 +396,7 @@ export default function GamePage() {
           Grand Prize Pool
         </p>
         <p className="text-4xl font-bold text-cyan-400 glow-pulse sm:text-6xl">
-          $1,500.00
+          ${prizePool}
         </p>
       </motion.div>
 
@@ -123,9 +411,8 @@ export default function GamePage() {
           initial={{ scale: 1 }}
           animate={{ scale: isClicked ? 0.9 : 1 }}
           transition={{ duration: 0.1 }}
-          className={`transition duration-200 button-glow ${
-            isClicked ? "button-glow-active" : ""
-          }`}
+          className={`transition duration-200 button-glow ${isClicked ? "button-glow-active" : ""
+            }`}
           style={{ borderRadius: "50%", padding: 0 }}
         >
           <Image

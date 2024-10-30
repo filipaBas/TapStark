@@ -42,6 +42,15 @@ export default function Home() {
 
       <ConnectButton layout="homepage" />
 
+      <Image
+        src="/images/starky.png"
+        alt="Starky"
+        priority={true}
+        width={150}
+        height={150}
+        className="mt-24 animate-bounce"
+      />
+
     </div>
   );
 }
