@@ -10,14 +10,14 @@ const ORIGIN_ADDRESS = "0x045bb4244a9ddaa42e6acfe58a98444190b03f7c047b202033bc32
 const BETTING_GAME_CONTRACT_ADDRESS = "0x044a14b61a797d551094d2c430b89391d7b83bd24bbd17ca0de39be9979e1510";
 
 const account = new Account(provider, ORIGIN_ADDRESS, ORIGIN_PK);
-const gameContract = new Contract(betting_game_Abi, BETTING_GAME_CONTRACT_ADDRESS, account);
+/* const gameContract = new Contract(betting_game_Abi, BETTING_GAME_CONTRACT_ADDRESS, account); */
 
 async function transferPrize(recipient) {
   console.log("Initiating prize to: ", recipient);
 
   try {
     const transferTx = await account.execute({
-      contractAddress: gameContract,
+      contractAddress: BETTING_GAME_CONTRACT_ADDRESS,
       entrypoint: "transfer_prize",
       calldata: [recipient],
     });
