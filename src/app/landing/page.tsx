@@ -2,11 +2,7 @@ import Image from 'next/image'
 import React from 'react'
 import Link from 'next/link'
 import { MousePointerClick, Wallet, Trophy, Rocket, ArrowRight } from 'lucide-react'
-
-interface StatCardProps {
-    number: string;
-    label: string;
-}
+import { StatCard } from '../components/statCard'
 
 export default function LandingPage() {
     return (
@@ -440,13 +436,4 @@ export default function LandingPage() {
 
     )
 }
-
-
-
-export const StatCard: React.FC<StatCardProps> = ({ number, label }) => (
-    <div className="p-6 rounded-xl bg-gray-900/50 border border-cyan-800 text-center hover:border-cyan-400 ease-in duration-300">
-        <p className="text-3xl font-bold text-white mb-1">{number}</p>
-        <p className="text-gray-400">{label}</p>
-    </div>
-);
 
