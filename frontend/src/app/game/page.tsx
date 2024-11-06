@@ -1,12 +1,21 @@
 "use client";
 import Image from "next/image";
 import * as motion from "framer-motion/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWallet } from "../context/walletContext";
 import ConnectButton from "../components/connectButton";
 import { AnimatePresence } from "framer-motion";
 import AnimatedPoints from "../components/animatedPoints";
 import MotionNumber from "motion-number";
+import { useAccount, useReadContract, useSendTransaction, useNetwork, useContract } from "@starknet-react/core";
+import contractABI from "../abis/abi.json"
+
+function toFelt256(value: bigint) {
+  const mask = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+  const low = value & mask;
+  const high = value >> BigInt("128");
+  return { low, high };
+}
 
 export default function GamePage() {
   const { isConnected } = useWallet();
@@ -14,6 +23,70 @@ export default function GamePage() {
   const [points, setPoints] = useState(0);
   const [showPoints, setShowPoints] = useState(false);
   const [addedPoints, setAddedPoints] = useState(0);
+ 
+
+  const { account } = useAccount();
+  const contractAddress = "0x044a14b61a797d551094d2c430b89391d7b83bd24bbd17ca0de39be9979e1510";
+  const minBetAmount = 0.0004119987 //min in ETH
+  const tapsAllowed = 20;
+  const requiredAllowanceInEth = minBetAmount * tapsAllowed;
+  const requiredAllowance = BigInt(requiredAllowanceInEth * 1e18);
+
+  const { low, high } = toFelt256(requiredAllowance);
+
+  const { chain } = useNetwork();
+  const { contract } = useContract({ 
+  abi: contractABI, 
+  address: chain.nativeCurrency.address, 
+});
+
+  // Hook to read the remaining allowance
+  const { data, refetch: refetchAllowance } = useReadContract({
+    address: chain.nativeCurrency.address,
+    functionName: "get_remaining_allowance",
+    args: [account?.address], 
+  });
+
+  console.log("chain.nativeCurrency.address", chain.nativeCurrency.address, "contract", contract)
+
+  useEffect(() => {
+    if (data !== undefined) {
+      console.log("Allowance updated:", data);
+    } else {
+      console.log("Fetching allowance...");
+    }
+  }, [data]);
+
+  const currentAllowance = data ? Number(data) : 0;
+
+  console.log("currentAllowance", currentAllowance, "allowanceData", data, "account?.address", account?.address)
+
+   // Hook to send transactions (approve betting amount)
+   const { send } = useSendTransaction({ calls: [] });
+  
+  const approveAllowance = async () => {
+    if (!account || !minBetAmount || !contract) return;
+
+    try {
+         const callData = {
+        contractAddress,
+        entrypoint: "approve_betting_amount",
+        calldata: [{ low, high }],
+      };
+
+      await send([callData]);
+      alert("Allowance approved!");
+
+      // Wait for refetchAllowance to complete
+      const allowanceData = await refetchAllowance();
+      console.log("Updated allowance data:", allowanceData);
+    } catch (err) {
+      console.error("Error approving allowance:", err);
+      alert("Failed to approve allowance.");
+    }
+
+   
+  };
 
   const playSoundBetClick = () => {
     const audio = new Audio("/sounds/water-bleep.wav");
@@ -49,11 +122,19 @@ export default function GamePage() {
     }
   };
 
-  const handleBetClick = () => {
+  const handleBetClick = async () => {
     if (!isConnected) {
       alert("Connect your wallet to play.");
       return;
     }
+
+    if (currentAllowance < minBetAmount) {
+      const requiredAllowanceEth = Number(requiredAllowance) / 1e18;
+      alert(`Insufficient allowance. Minimum required: ${requiredAllowanceEth.toFixed(6)} ETH.`);
+      await approveAllowance();
+      return;
+    }
+
     playSoundBetClick();
     setIsClicked(true);
     handleTapToPlay();
