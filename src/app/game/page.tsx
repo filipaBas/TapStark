@@ -25,11 +25,8 @@ export default function GamePage() {
       "0x01a8731a6abf51cee46f8a32e277826fe78c2efa72ac17d6190e1f389cbbc74e"; // should be dynamic
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/play/${txHash}`, {
+      const response = await fetch(`/api/play?txHash=${txHash}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
       if (!response.ok) {
