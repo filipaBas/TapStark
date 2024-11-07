@@ -3,7 +3,7 @@ import betting_game_Abi from "../../../contracts/betting_game_abi.json";
 
 const privateKey = process.env.ORIGIN_PRIVATE_KEY;
 const accountAddress =
-  "0x045bb4244a9ddaa42e6acfe58a98444190b03f7c047b202033bc32dd71389da6";
+  "0x07701ed1a79e2672b5b83e68a7c0d9d120b4ade0549dab6272a8dfa3ad5da9bf";
 
 const provider = new RpcProvider({
   nodeUrl: `https://starknet-sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,
