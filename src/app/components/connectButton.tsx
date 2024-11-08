@@ -49,6 +49,7 @@ export default function ConnectButton({ layout }: ConnectButtonProps) {
             <button
                 className={buttonClass}
                 onClick={handleConnectClick}
+                onTouchStart={handleConnectClick}
                 disabled={!!account}
             >
                 <Image
