@@ -14,6 +14,7 @@ export default function GamePage() {
   const [points, setPoints] = useState(0);
   const [showPoints, setShowPoints] = useState(false);
   const [addedPoints, setAddedPoints] = useState(0);
+  const [prizePool, setPrizePool] = useState(0.01);
 
   const playSoundBetClick = () => {
     const audio = new Audio("/sounds/water-bleep.wav");
@@ -21,6 +22,8 @@ export default function GamePage() {
   };
 
   const handleTapToPlay = async () => {
+    setPrizePool(prevPool => prevPool + 0.005);
+
     const txHash =
       "0x01a8731a6abf51cee46f8a32e277826fe78c2efa72ac17d6190e1f389cbbc74e"; // should be dynamic
 
@@ -105,7 +108,7 @@ export default function GamePage() {
           Grand Prize Pool
         </p>
         <p className="text-4xl font-bold text-cyan-400 glow-pulse sm:text-6xl">
-          $1,500.00
+          {prizePool.toFixed(3)} ETH
         </p>
       </motion.div>
 
